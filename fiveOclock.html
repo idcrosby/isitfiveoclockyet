@@ -1,0 +1,41 @@
+<html>
+   <head>
+      <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+   </head>
+<body bgcolor="#ffffff">
+   <input type="hidden" id="hdnTimeZone" name="hdnTimeZone"/>
+   <script type="text/javascript" language="javascript" >
+      // This works in firefox but not Chrome? 
+        var objLocalZone = new Date();
+        var strLocalZone=''+objLocalZone; 
+
+        var mySplitResult = strLocalZone.split(" ");
+
+        var newLocalZone = mySplitResult[5].slice(0,mySplitResult[5].length-2) +':'+mySplitResult[5].slice(mySplitResult[5].length-2,mySplitResult[5].length);
+
+          var method = "post"; // Set method to post by default if not specified.
+          var params
+          var path = "/"
+          // The rest of this code assumes you are not using a library.
+          // It can be made less wordy if you use one.
+          var form = document.createElement("form");
+          form.setAttribute("method", method);
+          form.setAttribute("action", path);
+
+          // for(var key in params) {
+              // if(params.hasOwnProperty(key)) {
+                  var hiddenField = document.createElement("input");
+                  hiddenField.setAttribute("type", "hidden");
+                  hiddenField.setAttribute("name", "zone");
+                  hiddenField.setAttribute("value", newLocalZone);
+                  // hiddenField.setAttribute("zone", newLocalZone)
+
+                  form.appendChild(hiddenField);
+               // }
+          // }
+
+          document.body.appendChild(form);
+          form.submit();
+   </script>
+   </body>
+</html>
