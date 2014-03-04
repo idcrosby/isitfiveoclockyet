@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"text/template"
 	"strconv"
+	"math"
 )
 
 func main() {
@@ -28,37 +29,11 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		r.ParseForm()
 		var zone = r.FormValue("zone")
-		//fmt.Printf("Zone: %s", zone)
+		fmt.Printf("Zone: %s \n", zone)
 
-		// Get Hour at GMT
-		// TODO assuming EST zone
-		var hour = time.Now().Hour() + 5
-		var minute = time.Now().Minute()
+		var hour = getLocalHour(zone)
 
-		// TODO catch errors
-		var hourDiff, _ = strconv.Atoi(zone[4:6])
-		var minDiff, _ = strconv.Atoi(zone[7:9])
-
-		if (zone[:3] == "GMT") {
-			if (zone[3:4] == "-") {
-				if (minDiff > minute) {
-					hourDiff++
-				}
-				hour = hour - hourDiff % 24
-			} else if (zone[3:4] == "+") {
-				if (minDiff + minute > 60) {
-					hourDiff++
-				}
-				hour = hour + hourDiff % 24
-			} else {
-				//error
-			}
-		} else {
-			// Switch on all time zones?
-		}
-
-		//fmt.Printf("Adjusted local hour: %d", hour)
-		// fmt.Printf("PostForm: %s", r.Form)
+		fmt.Printf("Adjusted local hour: %d \n", hour)
 		var mainTemplate, err  = template.ParseFiles("fiveOclockWithZone.html")
 		if err != nil {
 			w.WriteHeader(404)
@@ -72,14 +47,44 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 			message = "It's five o'clock somewhere"
 		}
 		var data = Data{Message: message}
-		// var name, offset = time.Now().Zone()
-		// fmt.Printf("Zone is %s with offset of %d", name, offset)
 		mainTemplate.Execute(w, data)
 	}
 }
 
-func getTimeZone() {
-	// time.Now().Zone
+func getLocalHour(zone string) int {
+	// Get Hour at GMT
+	var hour = time.Now().UTC().Hour()
+	var minute = time.Now().Minute()
+
+	// TODO catch errors
+	var hourDiff, err = strconv.Atoi(zone[3:6])
+	if (err != nil) {
+		return hour
+	}
+	var minDiff, err1 = strconv.Atoi(zone[7:9])
+	if (err1 != nil) {
+		return hour
+	}
+
+	if (zone[:3] == "GMT") {
+		// TODO Make this smarter
+		if (zone[3:4] == "-") {
+			if (minDiff > minute) {
+				hourDiff++
+			}
+		} else if (zone[3:4] == "+") {
+			if (minDiff + minute > 60) {
+				hourDiff++
+			}
+		} else {
+			//Unknown format
+		}
+		hour = int(math.Mod(float64(hour + hourDiff) + 24.0, 24.0))
+	} else {
+		// Switch on all time zones?
+	}
+
+	return hour
 }
 
 // Create a string which contains all important request data
