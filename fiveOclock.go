@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"net/http/httputil"
 	"net/http"
 	"time"
-	"bytes"
 	"text/template"
 	"strconv"
 	"math"
@@ -17,7 +15,6 @@ func main() {
 }
 
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
-	// fmt.Printf("Request: %s", requestAsString(r))
 
 	if (r.Method == "GET") {
 		var mainTemplate, err  = template.ParseFiles("fiveOclock.html")
@@ -85,19 +82,6 @@ func getLocalHour(zone string) int {
 	}
 
 	return hour
-}
-
-// Create a string which contains all important request data
-func requestAsString(request *http.Request) []byte {
-	var buffer bytes.Buffer
-	buffer.WriteString("\n")
-	buffer.WriteString("Current Time: ")
-	buffer.WriteString(time.Now().String())
-	buffer.WriteString("\n")
-	requestBytes, _ := httputil.DumpRequest(request, true)
-	buffer.Write(requestBytes)
-
-	return buffer.Bytes()
 }
 
 type Data struct {
